@@ -1,5 +1,5 @@
 // The files we want to cache
-var CACHE_NAME = 'site-cache-v1';
+var CACHE_NAME = 'site-cache-v2';
 var urlsToCache = [
   '/'
 ];
@@ -25,6 +25,20 @@ self.addEventListener('fetch', function(event) {
 			}
 
 			return fetch(event.request);
+		})
+	);
+});
+
+this.addEventListener('activate', function(event) {
+	var cacheWhitelist = [CACHE_NAME];
+
+	event.waitUntil(
+		caches.keys().then(function(keyList) {
+			return Promise.all(keyList.map(function(key) {
+				if (cacheWhitelist.indexOf(key) === -1) {
+					return caches.delete(key);
+				}
+			}));
 		})
 	);
 });

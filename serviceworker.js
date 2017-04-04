@@ -1,7 +1,9 @@
 // The files we want to cache
 var CACHE_NAME = 'site-cache-v2';
 var urlsToCache = [
-  '/'
+  '/',
+  '/blog',
+  '/how-this-blog-was-made/'
 ];
 
 // Set the callback for the install step

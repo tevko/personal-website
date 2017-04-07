@@ -1,9 +1,9 @@
 // The files we want to cache
-const CACHE_NAME = 'site-cache-v5';
+const CACHE_NAME = 'site-cache-v6';
 
 const urlsToCache = [
   '/',
-  '/blog',
+  '/blog/',
   '/blog/how-this-blog-was-made/',
   '/blog/wp-content/themes/blog/public/css/main.min.css',
   'https://fonts.googleapis.com/css?family=Open+Sans:400,700'

@@ -56,7 +56,8 @@
 				}
 			});
 			window.addEventListener('online',  function() {
-
+				var d = document.querySelector('._JS_offLineBanner');
+				document.body.removeChild(d);
 			});
 		}
 	</script>

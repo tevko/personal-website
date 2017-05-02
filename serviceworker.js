@@ -1,9 +1,10 @@
 // The files we want to cache
-const CACHE_NAME = 'site-cache-v7';
+const CACHE_NAME = 'site-cache-v6';
 
 const urlsToCache = [
   '/',
   '/blog/',
+  '/blog/how-this-blog-was-made/',
   '/blog/how-this-blog-was-made/',
   '/blog/wp-content/themes/blog/public/css/main.min.css',
   'https://fonts.googleapis.com/css?family=Open+Sans:400,700'
@@ -11,6 +12,7 @@ const urlsToCache = [
 
 self.addEventListener('install', (event) => {
     // Perform install steps
+    self.skipWaiting();
     event.waitUntil(caches.open(CACHE_NAME).then(cache =>
         Promise.all(
              urlsToCache.map((url) => {

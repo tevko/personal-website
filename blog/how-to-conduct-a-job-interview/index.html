@@ -99,6 +99,18 @@ Whether it&#8217;s on a whiteboard, computer, or napkin, this practice needs to 
 			});
 		}
 	</script>
+<script>
+	if ('serviceWorker' in navigator) {
+	  navigator.serviceWorker.register('/serviceworker.js').then(function(registration) {
+	    // Registration was successful
+	    registration.update();
+	    console.log('ServiceWorker registration successful with scope: ',    registration.scope);
+	  }).catch(function(err) {
+	    // registration failed :(
+	    console.log('ServiceWorker registration failed: ', err);
+	  });
+	}
+</script>
 </footer>
 
 

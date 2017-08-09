@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="/blog/wp-content/themes/blog/public/css/main.min.css">
+<title>Playing Battleship with your computer &#8211; Blog</title>
+</head>
+
+<body class="post-template-default single single-post postid-101 single-format-standard">
+
+
+<header class="main-header">
+	<div class="site-container">
+		<h1>Playing Battleship with your computer</h1>
+		<a href="https://twitter.com/Tevko">
+			<svg
+			  viewbox="0 0 2000 1625.36"
+			  width="20"
+			  height="16.25">
+			  <path
+			    d="m 1999.9999,192.4 c -73.58,32.64 -152.67,54.69 -235.66,64.61 84.7,-50.78 149.77,-131.19 180.41,-227.01 -79.29,47.03 -167.1,81.17 -260.57,99.57 C 1609.3399,49.82 1502.6999,0 1384.6799,0 c -226.6,0 -410.328,183.71 -410.328,410.31 0,32.16 3.628,63.48 10.625,93.51 -341.016,-17.11 -643.368,-180.47 -845.739,-428.72 -35.324,60.6 -55.5583,131.09 -55.5583,206.29 0,142.36 72.4373,267.95 182.5433,341.53 -67.262,-2.13 -130.535,-20.59 -185.8519,-51.32 -0.039,1.71 -0.039,3.42 -0.039,5.16 0,198.803 141.441,364.635 329.145,402.342 -34.426,9.375 -70.676,14.395 -108.098,14.395 -26.441,0 -52.145,-2.578 -77.203,-7.364 52.215,163.008 203.75,281.649 383.304,284.946 -140.429,110.062 -317.351,175.66 -509.5972,175.66 -33.1211,0 -65.7851,-1.949 -97.8828,-5.738 181.586,116.4176 397.27,184.359 628.988,184.359 754.732,0 1167.462,-625.238 1167.462,-1167.47 0,-17.79 -0.41,-35.48 -1.2,-53.08 80.1799,-57.86 149.7399,-130.12 204.7499,-212.41"/>
+			</svg>
+		</a>
+	</div>
+</header>
+<main>
+	<article class="article-post">
+		<div class="content">
+			<p><img class="aligncenter wp-image-105 size-full" src="/blog/wp-content/uploads/2017/06/battleship-screen.png" alt="" width="1440" height="969" srcset="/blog/wp-content/uploads/2017/06/battleship-screen.png 1440w, /blog/wp-content/uploads/2017/06/battleship-screen-300x202.png 300w, /blog/wp-content/uploads/2017/06/battleship-screen-768x517.png 768w, /blog/wp-content/uploads/2017/06/battleship-screen-1024x689.png 1024w" sizes="(max-width: 1440px) 100vw, 1440px" /></p>
+<p>I recently decided to make a game after a company sent me a coding challenge based around the same concept (which I never actually ended up completing). The challenge was to build an API based around the game <a href="https://en.wikipedia.org/wiki/Battleship_(game)">Battleship</a>. I thought it would be fun to turn it into a front end project, which is what I ended up doing.</p>
+<p>To start, I decided that I would use a 6&#215;6 grid, wherein each piece would take up a single point on said grid. This makes the game go a bit faster, while also making the project a bit easier to code for.  I also had a few goals I wanted to achieve for this game. I wanted it to be completely responsive, available offline, installable on a user&#8217;s device, and for the code to be as simple as possible. That said, I&#8217;m happy to have accomplished all of those goals. <a href="https://github.com/tevko/battleship-game">The frontend</a> (there&#8217;s no backend at all) uses no transpilation, preprocessing, or build tools. The UI is fully responsive, available offline, and installable thanks to TLS, a service worker, and a manifest.json file.</p>
+<p>While there is a lot happening behind the scenes in order to create the game, there were a few particularly challenging aspects that I think would be interesting to share here.</p>
+<p>&nbsp;</p>
+<h3>Challenge #1 &#8211; Creating a random set of coordinates for the computer game board</h3>
+<p>Since we&#8217;re playing against the computer, we&#8217;ll need it to come up with 6 unique and non-repeating pairs of numbers ranging from 1 to 6 ([1,1], [2,2], [3,3], etc). In order to do this I wrote a recursive function that generates a random set and compares it against any existing sets, pushing the new set to the existing collection, or discarding it if it already exists. Here&#8217;s what that looks like:</p>
+<p class="codepen" data-height="617" data-theme-id="1265" data-slug-hash="jwMERQ" data-default-tab="js" data-user="tevko" data-embed-version="2" data-pen-title="jwMERQ">See the Pen <a href="https://codepen.io/tevko/pen/jwMERQ/">jwMERQ</a> by Tim (<a href="https://codepen.io/tevko">@tevko</a>) on <a href="https://codepen.io/">CodePen</a>.</p>
+<p><script async src="https://production-assets.codepen.io/assets/embed/ei.js"></script></p>
+<p>First off we have an empty array called usedCoords, which will store the coordinate pairs as they are generated. Next, we have another empty array which will store the value of the coordinate pairs converted to a string, which will make them easier to test against when we want to ensure that our computer gameboard doesn&#8217;t have any duplicate coordinates(This is because [2,2] === [2,2] returns false while [2,2].toString() === [2,2].toString() returns true). returnNewCoords is used to generate an array containing 2 random numbers from 1 &#8211; 6, and returnAvailableCoords is a recursive function which returns a new coordinate pair or itself if the pair has been used already. The final part of this function is a loop through our internal state which assigns each of the computer generated coordinate pairs to a corresponding vessel object.</p>
+<p>Collecting coordinates from the user is a little bit less challenging, which we accomplish by storing the user&#8217;s input on 12 individual input elements, and matching those inputs against a collection of DOM elements with corresponding data attributes (user chose 1,2 as a coordinate pair, so we add a game piece to the div with a data attribute that matches data-coord-point=&#8221;1-2&#8243;).</p>
+<h3>Challenge #2 &#8211; Pretending that the computer needs time to guess</h3>
+<p>This is one that surprised me, but none the less I realized that the game isn&#8217;t fun to play if the computer makes a guess immediately after you&#8217;re done guessing yourself. Instead, the computer needs to be personified so that the game doesn&#8217;t feel to mechanical. Translation: it needs to feel like the computer is &#8220;thinking&#8221;. Even though it takes the computer a few milliseconds to come up with a coordinate guess, we need to wait to show that guess to the user until a few seconds have passed.</p>
+<p>As I slowly began to realize, the whole game needs a bit of artificial delay in order to feel more real. I decided to keep it simple, using setTimeout to create the delay after each specific action. <a href="https://github.com/tevko/battleship-game/blob/master/game.js#L187">You&#8217;ll find quite a few of these throughout the codebase.</a></p>
+<h3>Challenge #3 &#8211; CSS</h3>
+<p>While the design for this game is minimal (non-existent would be a better term) a unique challenge presented itself in the form of having to create a responsive checkerboard. My initial strategy was to display each checker as an inline-block item with a percentage based width, but that quickly failed after the screen size got smaller. Eventually, I figured out that using  a flexbox based layout, combined with a padding top percentage value to create the height of each item,  would allow each checker to scale proportionately no matter the screen size. As for the tiled backgrounds, I used the nth-child selector to give every other tile a purple background instead of an orange one. I&#8217;d love to say that I used some magical formula to calculate what the nth-child block should be to make it look perfect, but it really was just an hour or so of frustrated googling combined with trial and error until it looked right. You can see it all working here:</p>
+<p class="codepen" data-height="617" data-theme-id="1265" data-slug-hash="XaRJVO" data-default-tab="result" data-user="tevko" data-embed-version="2" data-pen-title="XaRJVO">See the Pen <a href="https://codepen.io/tevko/pen/XaRJVO/">XaRJVO</a> by Tim (<a href="https://codepen.io/tevko">@tevko</a>) on <a href="https://codepen.io/">CodePen</a>.</p>
+<p><script async src="https://production-assets.codepen.io/assets/embed/ei.js"></script></p>
+<h3>Next Steps</h3>
+<p>The next feature I&#8217;d like to add to this game is to enable the browser to remember the user&#8217;s game state if they navigate away from the page or accidentally refresh. This would be accomplished by saving a serialized state object to the browser localStorage whenever the state gets updated, followed by checking for that state object on page load and using that object as the new state.  Additionally, the ability to auto-fill the user&#8217;s board at the click of a button would create a better experience in the case where a user doesn&#8217;t feel like filling out a form every time they want to play.</p>
+		</div>
+		<div class="meta">
+			<p> <strong>Categorized Under:</strong>
+			<a class="meta-link" href="/blog/category/tech">Tech</a> 			</p>
+			<p> <strong>Tagged As:</strong>
+			<a class="meta-link" href="/blog/tag/css">css</a> <a class="meta-link" href="/blog/tag/flexbox">flexbox</a> <a class="meta-link" href="/blog/tag/front-end-web-development">Front End Web Development</a> <a class="meta-link" href="/blog/tag/how-its-made">How It's Made</a> <a class="meta-link" href="/blog/tag/javascript">javascript</a> 			</p>
+		</div>
+	</article>
+	<aside>
+		<div class="post-list">
+			<h3>Recent Posts</h3>
+			<div><a href="/blog/how-to-conduct-a-job-interview/">How to Conduct a Job Interview</a></div><div><a href="/blog/how-this-blog-was-made/">How This Blog Was Made</a></div>
+		</div>
+	</aside>
+</main>
+
+
+
+
+<footer>
+	<div class="site-container">
+		<a href="/blog/">View all Posts</a>
+		<a href="/">About Me</a>
+	</div>
+	<script>
+		if(navigator.onLine) {
+			window.addEventListener('offline', function() {
+				var d = document.createElement('div');
+				d.classList.add('_JS_offLineBanner');
+				d.innerHTML = 'It looks like you\'re offline! Not to worry, you can still read all articles on the blog! <span class="_JS_closeOfflineBanner">x</span>';
+				d.classList.add('offline-banner');
+				document.body.appendChild(d);
+			});
+			document.body.addEventListener('click', function(e) {
+				if (e.target.classList.contains('_JS_closeOfflineBanner')) {
+					var d = document.querySelector('._JS_offLineBanner');
+					document.body.removeChild(d);
+				}
+			});
+			window.addEventListener('online',  function() {
+				var d = document.querySelector('._JS_offLineBanner');
+				document.body.removeChild(d);
+			});
+		}
+	</script>
+	<script>
+		if ('serviceWorker' in navigator) {
+		  navigator.serviceWorker.register('/serviceworker.js').then(function(registration) {
+		    // Registration was successful
+		    registration.update();
+		    console.log('ServiceWorker registration successful with scope: ',    registration.scope);
+		  }).catch(function(err) {
+		    // registration failed :(
+		    console.log('ServiceWorker registration failed: ', err);
+		  });
+		}
+	</script>
+</footer>
+
+
+</body>
+</html>

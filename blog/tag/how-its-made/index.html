@@ -27,6 +27,10 @@
 	<section class="post-list site-container">
 
 			<article>
+			<a href="/blog/playing-battleship-with-your-computer/">Playing Battleship with your computer</a>
+			<p>Published: August 8, 2017 at 9:17 pm</p>
+		</article>
+			<article>
 			<a href="/blog/how-this-blog-was-made/">How This Blog Was Made</a>
 			<p>Published: March 1, 2017 at 1:35 am</p>
 		</article>
@@ -61,18 +65,18 @@
 			});
 		}
 	</script>
-<script>
-	if ('serviceWorker' in navigator) {
-	  navigator.serviceWorker.register('/serviceworker.js').then(function(registration) {
-	    // Registration was successful
-	    registration.update();
-	    console.log('ServiceWorker registration successful with scope: ',    registration.scope);
-	  }).catch(function(err) {
-	    // registration failed :(
-	    console.log('ServiceWorker registration failed: ', err);
-	  });
-	}
-</script>
+	<script>
+		if ('serviceWorker' in navigator) {
+		  navigator.serviceWorker.register('/serviceworker.js').then(function(registration) {
+		    // Registration was successful
+		    registration.update();
+		    console.log('ServiceWorker registration successful with scope: ',    registration.scope);
+		  }).catch(function(err) {
+		    // registration failed :(
+		    console.log('ServiceWorker registration failed: ', err);
+		  });
+		}
+	</script>
 </footer>
 
 

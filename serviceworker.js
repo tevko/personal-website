@@ -1,5 +1,5 @@
 // The files we want to cache
-const CACHE_NAME = 'site-cache-v12';
+const CACHE_NAME = 'site-cache-v13';
 
 const urlsToCache = [
   '/',

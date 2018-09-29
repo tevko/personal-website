@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="/blog/wp-content/themes/blog-master/public/css/main.min.css">
+<title>Introducing: Bad-DOM &#8211; the smallest* component renderer &#8211; Blog &#8211; Tim Evko</title>
+</head>
+
+<body class="post-template-default single single-post postid-18 single-format-standard">
+
+
+<header class="main-header">
+	<div class="site-container">
+		<h1>Introducing: Bad-DOM &#8211; the smallest* component renderer</h1>
+		<a href="https://twitter.com/Tevko">
+			<svg
+			  viewbox="0 0 2000 1625.36"
+			  width="20"
+			  height="16.25">
+			  <path
+			    d="m 1999.9999,192.4 c -73.58,32.64 -152.67,54.69 -235.66,64.61 84.7,-50.78 149.77,-131.19 180.41,-227.01 -79.29,47.03 -167.1,81.17 -260.57,99.57 C 1609.3399,49.82 1502.6999,0 1384.6799,0 c -226.6,0 -410.328,183.71 -410.328,410.31 0,32.16 3.628,63.48 10.625,93.51 -341.016,-17.11 -643.368,-180.47 -845.739,-428.72 -35.324,60.6 -55.5583,131.09 -55.5583,206.29 0,142.36 72.4373,267.95 182.5433,341.53 -67.262,-2.13 -130.535,-20.59 -185.8519,-51.32 -0.039,1.71 -0.039,3.42 -0.039,5.16 0,198.803 141.441,364.635 329.145,402.342 -34.426,9.375 -70.676,14.395 -108.098,14.395 -26.441,0 -52.145,-2.578 -77.203,-7.364 52.215,163.008 203.75,281.649 383.304,284.946 -140.429,110.062 -317.351,175.66 -509.5972,175.66 -33.1211,0 -65.7851,-1.949 -97.8828,-5.738 181.586,116.4176 397.27,184.359 628.988,184.359 754.732,0 1167.462,-625.238 1167.462,-1167.47 0,-17.79 -0.41,-35.48 -1.2,-53.08 80.1799,-57.86 149.7399,-130.12 204.7499,-212.41"/>
+			</svg>
+		</a>
+	</div>
+</header>
+<main>
+	<article class="article-post">
+		<div class="content">
+			<p>*seriously, it&#8217;s 800 bytes minified + gzipped &#8211; <a href="https://github.com/tevko/BadDOM">Get it on Github</a></p>
+<div class="cp_embed_wrapper"><iframe id="cp_embed_jwMERQ" class="cp_embed_iframe " style="width: 100%; overflow: hidden;" title="jwMERQ" src="http://codepen.io/tevko/embed/MrwXdy/?height=265&amp;theme-id=dark&amp;default-tab=result&amp;embed-version=2" name="CodePen Embed" height="617" frameborder="0" scrolling="no" allowfullscreen="allowfullscreen"><span data-mce-type="bookmark" style="display: inline-block; width: 0px; overflow: hidden; line-height: 0;" class="mce_SELRES_start">﻿</span></iframe></div>
+<p>&nbsp;</p>
+<p><strong>I took some notes while I worked on this project. Here they are.</strong></p>
+<p>&nbsp;</p>
+<hr />
+<p><span style="font-weight: 400;">Building a dom diffing algorithm</span></p>
+<p>&nbsp;</p>
+<p><span style="font-weight: 400;">&#8211; can it be recursive?</span></p>
+<p>&nbsp;</p>
+<p><span style="font-weight: 400;">&#8211; function w/3 params: target (thing to change), source (html string), root (working record of changes)</span></p>
+<p>&nbsp;</p>
+<p><span style="font-weight: 400;">&#8211; 6 types of changes possible: nodeName, style, attribute, class, id, or innerContent</span></p>
+<p>&nbsp;</p>
+<p><span style="font-weight: 400;">&#8211; get rid of root parameter for now, too confusing to think about</span></p>
+<p>&nbsp;</p>
+<p><span style="font-weight: 400;">&#8211; create template, inject string, get new unrendered html inside template w/first 4 lines of vDiff function</span></p>
+<p>&nbsp;</p>
+<p><span style="font-weight: 400;">&#8211; refactor to object with methods</span></p>
+<p>&nbsp;</p>
+<p><span style="font-weight: 400;">&#8211; make super modular with recursive iterate method and individual functions to check 5 possible changes, iterate function should know if is top level node</span></p>
+<p><span style="font-weight: 400;">this.checkClass();</span></p>
+<p><span style="font-weight: 400;">this.checkID();</span></p>
+<p><span style="font-weight: 400;">this.checkAttributes();</span></p>
+<p><span style="font-weight: 400;">this.checkTextContent();</span></p>
+<p><span style="font-weight: 400;">this.checkNodeName();</span></p>
+<p><span style="font-weight: 400;"> all of these must know if elem is node or text content</span></p>
+<p>&nbsp;</p>
+<p><span style="font-weight: 400;"> &#8211; iterate recursive function should return iterate on childnodes or next sibling. use nextSibling instead of nextElementSibling so that whitespace is accounted for</span></p>
+<p><span style="font-weight: 400;"> &#8211; what to do if source contains additional node instead of alteration?</span></p>
+<p><span style="font-weight: 400;"> &#8211; text content switch was hardest, in some cases, parentElement doesn&#8217;t exist on #textnode, solved by checking childNodes array to see if textNode exists (L28)</span></p>
+<p><span style="font-weight: 400;"> &#8211; can remove checkID/checkClass functions because check attributes takes care of it</span></p>
+<p>&nbsp;</p>
+<p><span style="font-weight: 400;"> &#8211; now comes the interesting part &#8211; we need to check for new nodes in the source, and add them to the target</span></p>
+<p><span style="font-weight: 400;"> &#8211; need to replace line breaks and indents, which aren&#8217;t in target, but are in source template string / babel</span></p>
+<p><span style="font-weight: 400;"> &#8211; for some reason, a span is disappearing</span></p>
+<p><span style="font-weight: 400;">  &#8211; this was happening because replace child was removing the new element from source and moving it into target &#8211; solved with node.cloneNode(true)</span></p>
+<p><span style="font-weight: 400;">&#8211; iterating over element.children is much quicker / easier / less lines &#8211; refactoring &#8211; did in 10 lines what originally took 22</span></p>
+<p>&nbsp;</p>
+<p><span style="font-weight: 400;">&#8211; we need to iterate over whichever element (source vs target) has the most children, in the likely case that the 2 objects to diff have a different # of nodes and we need to remove / add some</span></p>
+<p><span style="font-weight: 400;">&#8211; need to adjust code to address for html comments, which have their own node type, in doing so also addressing the way we check for differing node types</span></p>
+		</div>
+		<div class="meta">
+			<p> <strong>Categorized Under:</strong>
+			<a class="meta-link" href="/blog/category/tech">Tech</a> 			</p>
+			<p> <strong>Tagged As:</strong>
+			<a class="meta-link" href="/blog/tag/front-end-web-development">Front End Web Development</a> <a class="meta-link" href="/blog/tag/how-its-made">How It's Made</a> <a class="meta-link" href="/blog/tag/javascript">javascript</a> 			</p>
+		</div>
+	</article>
+	<aside>
+		<div class="post-list">
+			<h3>Recent Posts</h3>
+			<div><a href="/blog/playing-battleship-with-your-computer/index.html">Playing Battleship with your computer</a></div><div><a href="/blog/how-to-conduct-a-job-interview/index.html">How to Conduct a Job Interview</a></div><div><a href="/blog/how-this-blog-was-made/index.html">How This Blog Was Made</a></div>
+		</div>
+	</aside>
+</main>
+
+
+
+
+<footer>
+	<div class="site-container">
+		<a href="/blog/">View all Posts</a>
+		<a href="/">About Me</a>
+	</div>
+	<script>
+		if(navigator.onLine) {
+			window.addEventListener('offline', function() {
+				var d = document.createElement('div');
+				d.classList.add('_JS_offLineBanner');
+				d.innerHTML = 'It looks like you\'re offline! Not to worry, you can still read all articles on the blog! <span class="_JS_closeOfflineBanner">x</span>';
+				d.classList.add('offline-banner');
+				document.body.appendChild(d);
+			});
+			document.body.addEventListener('click', function(e) {
+				if (e.target.classList.contains('_JS_closeOfflineBanner')) {
+					var d = document.querySelector('._JS_offLineBanner');
+					document.body.removeChild(d);
+				}
+			});
+			window.addEventListener('online',  function() {
+				var d = document.querySelector('._JS_offLineBanner');
+				document.body.removeChild(d);
+			});
+		}
+	</script>
+	<script>
+		if ('serviceWorker' in navigator) {
+		  navigator.serviceWorker.register('/serviceworker.js').then(function(registration) {
+		    // Registration was successful
+		    registration.update();
+		    console.log('ServiceWorker registration successful with scope: ',    registration.scope);
+		  }).catch(function(err) {
+		    // registration failed :(
+		    console.log('ServiceWorker registration failed: ', err);
+		  });
+		}
+	</script>
+</footer>
+
+
+</body>
+</html>

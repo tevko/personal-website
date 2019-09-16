@@ -1,5 +1,5 @@
 // The files we want to cache
-const CACHE_NAME = 'site-cache-v15';
+const CACHE_NAME = 'site-cache-v16';
 
 const urlsToCache = [
   '/',
@@ -27,7 +27,7 @@ self.addEventListener('install', (event) => {
 
 // respond with matches from cache
 self.addEventListener('fetch', (event) => {
-    if (urlsToCache.some(url => event.request.url.indexOf(url) !== -1 && url !== '/')) {
+    if (urlsToCache.some(url => event.request.url.indexOf(url) !== -1)) {
         event.respondWith(caches.match(event.request).then(response => {
             if (!response) {
                 const request = new Request(event.request.url);
